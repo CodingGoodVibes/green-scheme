@@ -4,22 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Wild Haven GreenScheme</title>
+  
+  <!-- 
+    TAILWIND CSS CDN: 
+    This script loads Tailwind CSS, a utility-first framework. 
+    Instead of writing separate CSS files, we style elements directly in the HTML 
+    using classes like 'text-center', 'bg-white', or 'rounded-xl'.
+  -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 
+    GOOGLE FONTS: 
+    Loading a custom font called 'Plus Jakarta Sans' to make the app look modern.
+  -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- 
+    CUSTOM STYLES: 
+    A tiny bit of custom CSS to apply our chosen font to the whole body 
+    and set a soft, nature-themed background color.
+  -->
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #f0fdf4;
+      background-color: #f0fdf4; /* Very light emerald green */
     }
   </style>
 </head>
+
+<!-- 
+  BODY ALIGNMENT: 
+  'min-h-screen' ensures the body is at least as tall as the browser window.
+  'flex items-center justify-center' pushes the main container perfectly into the middle of the screen.
+-->
 <body class="min-h-screen flex items-center justify-center p-4">
 
-  <!-- Main Container -->
+  <!-- 
+    MAIN CONTAINER: 
+    This is the white card that holds everything. 
+    'max-w-md w-full' ensures it doesn't get too wide on large screens but shrinks on mobile. 
+    'rounded-2xl shadow-xl' gives it that modern app feel with soft corners and a drop shadow.
+  -->
   <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-emerald-100 p-6 space-y-6">
     
-    <!-- Header -->
+    <!-- HEADER SECTION -->
     <div class="text-center space-y-2">
+      <!-- Icon Container (A little leaf/nature icon) -->
       <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mb-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -29,12 +59,26 @@
       <p class="text-xs text-emerald-600 font-medium">Nature & Wildlife Photo Location Mapper</p>
     </div>
 
-    <!-- Upload Box -->
+    <!-- UPLOAD BOX AREA -->
     <div class="space-y-4">
+      <!-- 
+        DROP ZONE: 
+        This is the dashed box. We use JavaScript later so that clicking anywhere 
+        inside this box triggers the hidden file input inside it.
+      -->
       <div id="drop-zone" class="border-2 border-dashed border-emerald-300 rounded-xl p-6 text-center hover:border-emerald-500 transition-colors cursor-pointer bg-emerald-50/50 relative">
+        
+        <!-- 
+          HIDDEN FILE INPUT: 
+          Default browser file inputs look ugly. We hide this one completely (class="hidden") 
+          and use JavaScript to virtually 'click' it when the user clicks the drop zone.
+        -->
         <input type="file" id="photo-input" accept="image/*" class="hidden">
         
-        <!-- Default Empty State -->
+        <!-- 
+          DEFAULT EMPTY STATE: 
+          This is what the user sees before picking a photo (the icon and text).
+        -->
         <div id="upload-prompt" class="space-y-2">
           <div class="mx-auto w-10 h-10 text-emerald-500 flex items-center justify-center rounded-full bg-emerald-100">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -45,9 +89,16 @@
           <p class="text-xs text-emerald-600">JPG or PNG (Max 1 photo)</p>
         </div>
 
-        <!-- Image Preview State -->
+        <!-- 
+          IMAGE PREVIEW STATE: 
+          This is completely hidden (class="hidden") when the page loads. 
+          JavaScript will unhide this and hide the 'upload-prompt' once a photo is chosen.
+        -->
         <div id="preview-container" class="hidden relative">
+          <!-- The actual image preview -->
           <img id="image-preview" src="" alt="Selected Photo" class="max-h-48 mx-auto rounded-lg object-cover shadow-sm">
+          
+          <!-- The little 'X' button to remove the photo -->
           <button id="remove-btn" class="absolute top-1 right-1 bg-white/80 hover:bg-white text-gray-700 rounded-full p-1 shadow transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -56,17 +107,27 @@
         </div>
       </div>
 
-      <!-- Error Banner -->
+      <!-- 
+        ERROR BANNER: 
+        Hidden by default. JavaScript will inject error messages here if something goes wrong.
+      -->
       <div id="error-message" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-xs font-medium border border-red-200"></div>
 
-      <!-- Action Button -->
+      <!-- 
+        ACTION BUTTON: 
+        Starts 'disabled' (unclickable) until a photo is chosen. 
+        It contains a text span and a hidden spinner div for when it's loading.
+      -->
       <button id="upload-btn" disabled class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-200 text-white font-semibold rounded-xl shadow transition-all duration-200 flex items-center justify-center space-x-2">
         <span id="btn-text">Upload Photo</span>
         <div id="btn-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </button>
     </div>
 
-    <!-- Location Modal Result Card -->
+    <!-- 
+      LOCATION MODAL RESULT CARD: 
+      Hidden by default. Appears automatically after the S3 upload finishes.
+    -->
     <div id="location-modal" class="hidden p-4 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2 animate-fade-in">
       <div class="flex items-center space-x-2 text-emerald-800 font-semibold text-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,10 +137,12 @@
         <span>Photo Location Result</span>
       </div>
       
+      <!-- Where the actual city/country text gets injected -->
       <div id="location-text" class="text-base font-bold text-emerald-950 pl-7">
         Analyzing photo metadata...
       </div>
       
+      <!-- Subtitle showing the current status of the database poll -->
       <p id="location-status" class="text-xs text-emerald-600 pl-7 italic">
         Polling DynamoDB background processor...
       </p>
@@ -87,13 +150,24 @@
 
   </div>
 
+  <!-- JAVASCRIPT SECTION: This makes the page interactive -->
   <script>
-    // -------------------------------------------------------------
-    // REPLACE WITH YOUR ACTUAL API GATEWAY INVOKE URL:
-    // -------------------------------------------------------------
-    const API_BASE_URL = 'https://ohpzu9vdr9.execute-api.eu-west-2.amazonaws.com';
+    /*
+      ===============================================================
+      1. CONFIGURATION
+      ===============================================================
+      This is the URL to your AWS API Gateway. 
+      It acts as the front door for your backend Lambda functions.
+    */
+    const API_BASE_URL = 'https://YOUR-API-GATEWAY-URL.execute-api.eu-west-2.amazonaws.com';
 
-    // DOM Elements
+    /*
+      ===============================================================
+      2. DOM ELEMENT SELECTION
+      ===============================================================
+      Here we grab references to all the HTML elements we need to 
+      manipulate (hide, show, change text, etc.) using their IDs.
+    */
     const dropZone = document.getElementById('drop-zone');
     const photoInput = document.getElementById('photo-input');
     const uploadPrompt = document.getElementById('upload-prompt');
@@ -108,38 +182,62 @@
     const locationText = document.getElementById('location-text');
     const locationStatus = document.getElementById('location-status');
 
+    // This variable will temporarily hold the image file the user selects.
     let selectedFile = null;
 
-    // Open file selector
+    /*
+      ===============================================================
+      3. USER INTERACTION EVENT LISTENERS
+      ===============================================================
+    */
+
+    // A. Clicking the drop zone opens the computer's file browser
     dropZone.addEventListener('click', (e) => {
-      if (e.target.closest('#remove-btn')) return;
-      photoInput.click();
+      // Prevent this from triggering if they actually clicked the 'X' remove button inside it
+      if (e.target.closest('#remove-btn')) return; 
+      
+      // Virtually click the hidden HTML file input
+      photoInput.click(); 
     });
 
-    // Handle File Selection
+    // B. Handling the file once the user selects it from their computer
     photoInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
-        selectedFile = e.target.files[0];
+        selectedFile = e.target.files[0]; // Save the file to our variable
         
+        // FileReader is a browser tool that reads the file so we can show a quick preview
         const reader = new FileReader();
         reader.onload = (event) => {
-          imagePreview.src = event.target.result;
+          // Put the raw image data into the <img> tag
+          imagePreview.src = event.target.result; 
+          
+          // Hide the "Click to upload" text and show the image preview
           uploadPrompt.classList.add('hidden');
           previewContainer.classList.remove('hidden');
+          
+          // Turn on the big green Upload button
           uploadBtn.disabled = false;
           hideError();
           locationModal.classList.add('hidden');
         };
+        // Command the reader to start reading the file
         reader.readAsDataURL(selectedFile);
       }
     });
 
-    // Clear Selected File
+    // C. Handling the 'X' remove button click
     removeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      resetForm();
+      e.stopPropagation(); // Stops the dropZone click event from firing underneath it
+      resetForm();         // Call our reset helper function
     });
 
+    /*
+      ===============================================================
+      4. HELPER FUNCTIONS
+      ===============================================================
+    */
+
+    // Puts the UI completely back to its starting state
     function resetForm() {
       selectedFile = null;
       photoInput.value = '';
@@ -160,11 +258,18 @@
       errorMessage.classList.add('hidden');
     }
 
-    // Upload Execution
+    /*
+      ===============================================================
+      5. CORE UPLOAD LOGIC
+      ===============================================================
+      This function runs when the user clicks "Upload Photo".
+      Because it talks to servers, we use 'async' so the browser 
+      doesn't freeze while waiting for responses.
+    */
     uploadBtn.addEventListener('click', async () => {
-      if (!selectedFile) return;
+      if (!selectedFile) return; // Safety check
 
-      // Set Loading State
+      // Update UI to show Loading State
       uploadBtn.disabled = true;
       btnText.textContent = 'Uploading...';
       btnSpinner.classList.remove('hidden');
@@ -172,13 +277,22 @@
       locationModal.classList.add('hidden');
 
       try {
-        // Step 1: Request Presigned URL from API Gateway
+        /*
+          STEP 1: Get the "Key" to upload.
+          We ask our API Gateway / Lambda for a 'Presigned URL'.
+          This is a temporary, secure link that allows us to bypass our server 
+          and drop the image directly into the Amazon S3 bucket.
+        */
         const presignedRes = await fetch(`${API_BASE_URL}/get-upload-url`);
         if (!presignedRes.ok) throw new Error('Failed to get presigned upload URL.');
         
+        // Unpack the JSON response to get the URL and the generated filename
         const { uploadURL, fileName } = await presignedRes.json();
 
-        // Step 2: Directly Upload File to S3
+        /*
+          STEP 2: Upload directly to S3.
+          We use a 'PUT' request to send the heavy binary image file straight to AWS Storage.
+        */
         const uploadRes = await fetch(uploadURL, {
           method: 'PUT',
           body: selectedFile
@@ -186,27 +300,45 @@
 
         if (!uploadRes.ok) throw new Error('Failed to upload image directly to S3.');
 
-        // Step 3: Show Modal in Polling State
+        /*
+          STEP 3: S3 Upload is done. Update UI.
+          Now we wait for the background Lambda (process-photo-metadata) to do its job.
+        */
         btnText.textContent = 'Upload Complete!';
         btnSpinner.classList.add('hidden');
         locationModal.classList.remove('hidden');
         locationText.textContent = 'Analyzing photo metadata...';
         locationStatus.textContent = 'Extracting EXIF GPS coordinates...';
 
-        // Step 4: Poll DynamoDB for location result
+        /*
+          STEP 4: Start asking the database if it's done yet.
+        */
         pollForLocation(fileName);
 
       } catch (err) {
+        // If anything fails in the steps above, catch the error and show it
         console.error(err);
         showError(err.message || 'An error occurred during upload.');
+        
+        // Reset the button so they can try again
         uploadBtn.disabled = false;
         btnText.textContent = 'Upload Photo';
         btnSpinner.classList.add('hidden');
       }
     });
 
-    // Poll DynamoDB endpoint every 2 seconds (up to 10 attempts)
+    /*
+      ===============================================================
+      6. DATABASE POLLING LOGIC
+      ===============================================================
+      Because the backend Lambda processes the EXIF data in the background,
+      the frontend doesn't know exactly when it finishes.
+      
+      "Polling" means the frontend repeatedly asks the database (every 2 seconds) 
+      "Are you done yet?" until it gets the answer or times out.
+    */
     async function pollForLocation(fileName, attempts = 0) {
+      // If we've asked 10 times (20 seconds) and still no answer, give up.
       if (attempts >= 10) {
         locationText.textContent = 'Location unknown';
         locationStatus.textContent = 'Timed out waiting for location processing.';
@@ -214,20 +346,27 @@
       }
 
       try {
+        // Ask API Gateway to check DynamoDB for this specific file name
         const res = await fetch(`${API_BASE_URL}/get-location?fileName=${encodeURIComponent(fileName)}`);
+        
         if (res.ok) {
           const data = await res.json();
+          
+          // If the backend has replaced the temporary "Processing..." text with a real location
           if (data.location && data.location !== 'Processing EXIF metadata...') {
+            
+            // Success! Update the UI with the final location.
             locationText.textContent = data.location;
             locationStatus.textContent = 'Retrieved directly from DynamoDB';
-            return;
+            return; // Stop the polling loop completely
           }
         }
       } catch (err) {
         console.warn('Polling check error:', err);
       }
 
-      // Retry after 2 seconds
+      // If we didn't return (stop) above, wait 2000 milliseconds (2 seconds) 
+      // and then call this exact same function again, adding 1 to our attempts counter.
       setTimeout(() => pollForLocation(fileName, attempts + 1), 2000);
     }
   </script>
